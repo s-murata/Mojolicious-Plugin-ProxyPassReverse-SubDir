@@ -1,7 +1,7 @@
 package Mojolicious::Plugin::ProxyPassReverse::SubDir;
 use Mojo::Base 'Mojolicious::Plugin';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub register {
   my ($self, $app, $conf) = @_;
@@ -17,8 +17,11 @@ sub register {
     if ( defined ( my $v = $c->req->headers->header($header) ) ) {
       return if defined $value and $v ne $value;
 
-      push @{ $c->req->url->base->path->parts },
-        @{ $c->req->url->path->parts }[ 0 .. $depth - 1 ];
+     DEPTH:
+      for ( 1 .. $depth ) {
+        push @{ $c->req->url->base->path->parts },
+          shift @{ $c->req->url->path->parts };
+      }
     }
   });
 }
